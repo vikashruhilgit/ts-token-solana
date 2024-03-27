@@ -1,10 +1,19 @@
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { userKeyPair } from "./helpers";
-import { generateSigner, keypairIdentity, percentAmount } from "@metaplex-foundation/umi";
-import { TokenStandard, createV1, mintV1, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import {
+  generateSigner,
+  keypairIdentity,
+  percentAmount,
+} from "@metaplex-foundation/umi";
+import {
+  TokenStandard,
+  createV1,
+  mintV1,
+  mplTokenMetadata,
+} from "@metaplex-foundation/mpl-token-metadata";
 
-//instantiate a new instance of our umi client running on the devnet cluster. 
-const umi = createUmi('https://api.devnet.solana.com');
+//instantiate a new instance of our umi client running on the devnet cluster.
+const umi = createUmi("https://api.devnet.solana.com");
 
 /* 
 we will register our keyPair to be used as the default signer 
@@ -20,8 +29,7 @@ This is because umi’s public key interface is defined differently from the one
 The fix is quite easy as we only need to wrap our keypair around umi’s eddsa interface,
 */
 const keyPair = umi.eddsa.createKeypairFromSecretKey(userKeyPair.secretKey);
-umi.use(keypairIdentity(keyPair))
-    .use(mplTokenMetadata());
+umi.use(keypairIdentity(keyPair)).use(mplTokenMetadata());
 
 /* 
   Minting process
@@ -30,26 +38,26 @@ umi.use(keypairIdentity(keyPair))
   3. Finally, we mint our token with the associated accounts.
 */
 const metadata = {
-    name: "Solana Gold",
-    symbol: "GOLDSOL",
-    uri: "https://raw.githubusercontent.com/vikashruhilgit/ts-token-solana/main/src/assets/spl-token.json",
+  name: "Solana VIKI Gold",
+  symbol: "GOLDVIKISOL",
+  uri: "https://raw.githubusercontent.com/vikashruhilgit/ts-token-solana/main/src/assets/spl-token.json",
 };
 
 const mint = generateSigner(umi);
 
-// Using the CreateV1 method we here define the metadata and behaviour of our token such as the number of decimals… 
+// Using the CreateV1 method we here define the metadata and behaviour of our token such as the number of decimals…
 // CreateV1 is a generic function that can also be used to create a token that’s Non-Fungible
 async function createMetadataDetails() {
   await createV1(umi, {
-      mint,
-      authority: umi.identity,
-      name: metadata.name,
-      symbol: metadata.symbol,
-      uri: metadata.uri,
-      sellerFeeBasisPoints: percentAmount(0),
-      decimals: 9,
-      tokenStandard: TokenStandard.Fungible,
-  }).sendAndConfirm(umi)
+    mint,
+    authority: umi.identity,
+    name: metadata.name,
+    symbol: metadata.symbol,
+    uri: metadata.uri,
+    sellerFeeBasisPoints: percentAmount(0),
+    decimals: 9,
+    tokenStandard: TokenStandard.Fungible,
+  }).sendAndConfirm(umi);
 }
 
 /* 
@@ -60,15 +68,15 @@ To finish off our build, We will need to call the instruction to mint our tokens
 */
 async function mintToken() {
   await mintV1(umi, {
-      mint: mint.publicKey,
-      authority: umi.identity,
-      amount: 10_000,
-      tokenOwner: umi.identity.publicKey,
-      tokenStandard: TokenStandard.Fungible,
-  }).sendAndConfirm(umi)
+    mint: mint.publicKey,
+    authority: umi.identity,
+    amount: 10_000,
+    tokenOwner: umi.identity.publicKey,
+    tokenStandard: TokenStandard.Fungible,
+  }).sendAndConfirm(umi);
 }
 
-async function createToken(){
+async function createToken() {
   await createMetadataDetails();
   await mintToken();
 }
